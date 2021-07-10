@@ -9,7 +9,7 @@ package Codigos;
  */
 public class Simbolos {
 
-	private int Posicao;
+	//private int Posicao; //posição é o indice no array da tabela
 	private String Lexema;
 	private String Token;
 	private String Valor;
@@ -18,18 +18,16 @@ public class Simbolos {
 	
 	public Simbolos() {	}
 
-	public Simbolos(int posicao, String lexema, String token, String valor, String scopo) {
-		super();
-		Posicao = posicao;
+	public Simbolos(/*int posicao,*/ String lexema, String token, String valor, String scopo) {
+		//Posicao = posicao;
 		Lexema = lexema;
 		Token = token;
 		Valor = valor;
 		this.scopo = scopo;
 	}
 	
-	public Simbolos(int posicao, String lexema, String token, String valor, String scopo, int linhas, int colunas) {
-		super();
-		Posicao = posicao;
+	public Simbolos(/*int posicao,*/ String lexema, String token, String valor, String scopo, int linhas, int colunas) {
+		//Posicao = posicao;
 		Lexema = lexema;
 		Token = token;
 		Valor = valor;
@@ -38,12 +36,12 @@ public class Simbolos {
 		this.tamanho[1] = colunas;
 	}
 
-	public int getPosicao() {
+	/*public int getPosicao() {
 		return Posicao;
 	}
 	public void setPosicao(int posicao) {
 		Posicao = posicao;
-	}
+	}*/
 	public String getLexema() {
 		return Lexema;
 	}
@@ -69,6 +67,10 @@ public class Simbolos {
 
 	public void setScopo(String scopo) {
 		this.scopo = scopo;
+	}
+	
+	public void exibeSimbolo() {
+		System.out.print(this.Lexema + "    " + this.Token);
 	}
 
 	

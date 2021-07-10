@@ -19,22 +19,24 @@ public class Main {
 	/**
 	 * @param args
 	 */
-	public static void main(String[] args) throws FileNotFoundException {
+	public static int main(String[] args) throws FileNotFoundException {
 
-		ArrayList<Simbolos> TabelaSimbolos = new ArrayList<>();
 		String escopoAtual = "global";
 		String tokenLido = "";
 		char caractere;
-		ArrayList<String> PalavrasReservadas = new ArrayList<>();
 		
-		//preencher palavrasReservadas, por leitura de arquivo ou pelo código
+		//declaração da tabela de palavras reservadas
+		PalavraReservada palavrasReservadas = new PalavraReservada();
+		//criação da estrutura da tabela de simbolos
+		ArrayList<Simbolos> TabelaSimbolos = new ArrayList<>();
+		Simbolos simboloAux = new Simbolos();
+		
 		
 		
 		//definição do caminho
 		String caminho = "C:\\Users\\Amanda\\Desktop\\Trabalho\\compiladores\\Analisador Lexico\\input1.txt";
 		//leitura do arquivo
 		FileInputStream stream;
-		//ler palavras reservadas e armazenar em um vetor
 		try {
 			stream = new FileInputStream(caminho);
 			/*InputStreamReader reader = new InputStreamReader(stream);
@@ -47,19 +49,65 @@ public class Main {
 	        }*/
 	        InputStreamReader entradaFormatada = new InputStreamReader(stream);
 	        int c = entradaFormatada.read();
-	        while( c!=-1){
-				//System.out.print( (char) c);
+	        while( c != -1){
+	        	//leio o primeiro caractere
 	        	caractere = (char) c;
+	        	
+	        	if (tokenLido == "" && caractere == '!') {
+	        		//se corresponde à um comentário, continua a leitura até terminar e ignora
+	        		do {
+	        			caractere = (char) c;
+	        			c = entradaFormatada.read();
+	        		}while (caractere == '\n' && c != -1);
+	        	}
+	        	
+	        	//pegar valor das strings
+	        	else if (caractere == '"' && tokenLido == "") {
+	        		//ao ler a primeira aspa dupla, que não esteja no meio do token,
+	        		//continua a leitura até encontrar o fim da string
+	        		do {
+	        			caractere = (char) c;
+	        			tokenLido = tokenLido + caractere;
+	        			c = entradaFormatada.read();
+	        			if (c == -1) {
+	        				System.out.println("Erro encontrado!");
+	        				return 0;
+	        			}
+	        		}while (caractere == '"');
+	        		//adicionar na tabela
+	        	}
+	        	//separar os simbolos que podem ser identificados mesmo sem espaço
+	        	else if(palavrasReservadas.simboloDispensaEspaço(caractere)) {
+	        		//coloca o token na tabela e o simbolo também
+	        	}
 	        	//ler o token até cair em algo que faça parar
-				//ignorar espaços em branco e quebras de linha para as analises
-				if (caractere == ' ' || caractere == '\n') {
+	        	else if (caractere == ' ' || caractere == '\n') {
 					//se for palavra reservada só guarda na tabela de simbolos
-					if (PalavrasReservadas.contains(tokenLido)) {
+					if (palavrasReservadas.estaReservada(tokenLido)) {
+						//verifica se existe alteração de escopo
+						if (tokenLido == "subrotine" || tokenLido == "function") {
+							if (TabelaSimbolos.get(TabelaSimbolos.size() -1).getToken() == "end") {
+								escopoAtual = "global";
+							}
+							else {
+								//salva o nome da subrotina
+								escopoAtual = tokenLido;
+							}
+						}
+						//guarda na tabela de simbolos
+						TabelaSimbolos.add(new Simbolos("", tokenLido, "", escopoAtual));
+					}
+					//verifica se é uma variável
+					else if (tokenLido.matches("[a-zA-Z]+[a-zA-z0-9]*")){
 						
 					}
-					//se não, passar no AFD para ver se é id ou numero válido
-						//se for ta ok
-						//se não, exibe uma mensagem de erro com a falha sem parar a execução
+					//verifica se é um numeral valido
+					else if (tokenLido.matches("^[+-]?(([0-9]*[\\.][0-9]+)|([0-9]+[\\.][0-9]*)|([0-9]+))")){
+
+					}
+					else {
+						System.out.print("Erro encontrado próximo à " + tokenLido );
+					}
 				}
 				else {
 					tokenLido = tokenLido + c;
@@ -71,6 +119,13 @@ public class Main {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		//exibir a tabela de simbolos
+		int i = 0;
+		for(Simbolos s : TabelaSimbolos){
+			System.out.print("\n" + i);
+			s.exibeSimbolo();
+		}
+		return 0;
 		
 		
 		
