@@ -14,12 +14,13 @@ import java.util.ArrayList;
  * Esta não é a estrutura mais economica em processamento, mas foi escolhida por questão de praticidade
  */
 public class PalavraReservada {
-	private ArrayList<String> palavras;
+	private ArrayList<String> palavras = new ArrayList<>();
 	
 	public PalavraReservada() {
 		palavras.add("program");
 		palavras.add("implicit");
 		palavras.add("none");
+		palavras.add("integer");
 		palavras.add("complex");
 		palavras.add("character");
 		palavras.add("logical");
@@ -80,7 +81,7 @@ public class PalavraReservada {
 	
 	public boolean simboloDispensaEspaço(char c) {
 		
-		return (c == '+' || c == '-' || c == '*' || c == '/' || c == '\\' || c == ',') ? true : false;
+		return (c == '+' || c == '-' || c == '*' || c == '/' || c == '\\' || c == ',' || c =='(' || c == ')') ? true : false;
 		
 	}
 	

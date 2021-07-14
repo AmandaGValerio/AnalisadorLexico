@@ -19,7 +19,7 @@ public class Main {
 	/**
 	 * @param args
 	 */
-	public static int main(String[] args) throws FileNotFoundException {
+	public static void main(String[] args) throws FileNotFoundException {
 
 		String escopoAtual = "global";
 		String tokenLido = "";
@@ -39,51 +39,73 @@ public class Main {
 		FileInputStream stream;
 		try {
 			stream = new FileInputStream(caminho);
-			/*InputStreamReader reader = new InputStreamReader(stream);
-	        BufferedReader br = new BufferedReader(reader);
-	        String linha = br.readLine();
-	        while(linha != null) {
-	        	//le e exibe o conteudo
-	            System.out.println(linha);
-	            linha = br.readLine();
-	        }*/
 	        InputStreamReader entradaFormatada = new InputStreamReader(stream);
 	        int c = entradaFormatada.read();
 	        while( c != -1){
 	        	//leio o primeiro caractere
 	        	caractere = (char) c;
-	        	
+
 	        	if (tokenLido == "" && caractere == '!') {
 	        		//se corresponde à um comentário, continua a leitura até terminar e ignora
 	        		do {
 	        			caractere = (char) c;
 	        			c = entradaFormatada.read();
-	        		}while (caractere == '\n' && c != -1);
+	        		}while (caractere != '\n' && c != -1);
+	        		tokenLido = "";
 	        	}
 	        	
 	        	//pegar valor das strings
 	        	else if (caractere == '"' && tokenLido == "") {
 	        		//ao ler a primeira aspa dupla, que não esteja no meio do token,
 	        		//continua a leitura até encontrar o fim da string
+	        		caractere = (char) c;
 	        		do {
-	        			caractere = (char) c;
 	        			tokenLido = tokenLido + caractere;
 	        			c = entradaFormatada.read();
+	        			caractere = (char) c;
 	        			if (c == -1) {
 	        				System.out.println("Erro encontrado!");
-	        				return 0;
+	        				//parar a execução
+	        				System.out.println("Fim do arquivo");
+	        				break;
 	        			}
-	        		}while (caractere == '"');
+	        		}while (caractere != '"');
 	        		//adicionar na tabela
+	        		tokenLido = tokenLido + caractere;
+	        		simboloAux = new Simbolos("String", tokenLido, "", escopoAtual);
+	        		TabelaSimbolos.add(simboloAux);
+	        		simboloAux.exibeSimbolo();
+	        		tokenLido = "";
 	        	}
 	        	//separar os simbolos que podem ser identificados mesmo sem espaço
+	        	//ex: var=num+num
 	        	else if(palavrasReservadas.simboloDispensaEspaço(caractere)) {
 	        		//coloca o token na tabela e o simbolo também
+	        		//verifica se é variavel
+	        		if (tokenLido.matches("[a-zA-Z]+[a-zA-z0-9]*")) {
+	        			simboloAux = new Simbolos ("Variavel", tokenLido, "", escopoAtual);
+	        		//verifica se é um numeral
+	        		} else if (tokenLido.matches("^[+-]?(([0-9]*[\\.][0-9]+)|([0-9]+[\\.][0-9]*)|([0-9]+))")){
+	        			simboloAux = new Simbolos ("Numeral", tokenLido, "", escopoAtual);
+	        		}
+	        		//para demais tipos
+	        		else {
+	        			simboloAux = new Simbolos ("Unknow", tokenLido, "", escopoAtual);
+	        		}
+	        		TabelaSimbolos.add(simboloAux);
+	        		simboloAux.exibeSimbolo();
+	        		simboloAux = new Simbolos("Palavra reservada", String.valueOf(caractere), "", escopoAtual);
+	        		TabelaSimbolos.add(simboloAux);
+	        		simboloAux.exibeSimbolo();
+	        		tokenLido = "";
 	        	}
 	        	//ler o token até cair em algo que faça parar
-	        	else if (caractere == ' ' || caractere == '\n') {
+	        	else if (caractere == ' ' || caractere == '\n' || caractere == '\t'){
+	        		if (tokenLido == "") {
+	        			//ignora
+	        		}
 					//se for palavra reservada só guarda na tabela de simbolos
-					if (palavrasReservadas.estaReservada(tokenLido)) {
+	        		else if (palavrasReservadas.estaReservada(tokenLido)) {
 						//verifica se existe alteração de escopo
 						if (tokenLido == "subrotine" || tokenLido == "function") {
 							if (TabelaSimbolos.get(TabelaSimbolos.size() -1).getToken() == "end") {
@@ -95,22 +117,30 @@ public class Main {
 							}
 						}
 						//guarda na tabela de simbolos
-						TabelaSimbolos.add(new Simbolos("", tokenLido, "", escopoAtual));
+						TabelaSimbolos.add(new Simbolos("Palavra Reservada", tokenLido, "", escopoAtual));
+						tokenLido = "";
 					}
 					//verifica se é uma variável
 					else if (tokenLido.matches("[a-zA-Z]+[a-zA-z0-9]*")){
-						
+						simboloAux = new Simbolos("Variavel", tokenLido, "", escopoAtual);
+						TabelaSimbolos.add(simboloAux);
+						simboloAux.exibeSimbolo();
+						tokenLido = "";
 					}
 					//verifica se é um numeral valido
 					else if (tokenLido.matches("^[+-]?(([0-9]*[\\.][0-9]+)|([0-9]+[\\.][0-9]*)|([0-9]+))")){
-
+						simboloAux = new Simbolos("Numeral", tokenLido, "", escopoAtual);
+						TabelaSimbolos.add(simboloAux);
+						simboloAux.exibeSimbolo();
+						tokenLido = "";
 					}
 					else {
-						System.out.print("Erro encontrado próximo à " + tokenLido );
+						System.out.println("Erro encontrado próximo à " + tokenLido );
+						tokenLido = "";
 					}
 				}
 				else {
-					tokenLido = tokenLido + c;
+					tokenLido = tokenLido + caractere;
 				}
 				//le o proximo caractere
 				c = entradaFormatada.read();
@@ -119,13 +149,14 @@ public class Main {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		System.out.println("------------------------------------");
 		//exibir a tabela de simbolos
 		int i = 0;
 		for(Simbolos s : TabelaSimbolos){
-			System.out.print("\n" + i);
+			System.out.print("\n" + i + "   ");
 			s.exibeSimbolo();
+			i++;
 		}
-		return 0;
 		
 		
 		

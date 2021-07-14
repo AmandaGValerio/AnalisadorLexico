@@ -70,7 +70,7 @@ public class Simbolos {
 	}
 	
 	public void exibeSimbolo() {
-		System.out.print(this.Lexema + "    " + this.Token);
+		System.out.println(this.Lexema + "    " + this.Token);
 	}
 
 	
