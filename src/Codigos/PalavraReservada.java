@@ -81,7 +81,7 @@ public class PalavraReservada {
 	
 	public boolean simboloDispensaEspaço(char c) {
 		
-		return (c == '+' || c == '-' || c == '*' || c == '/' || c == '\\' || c == ',' || c =='(' || c == ')') ? true : false;
+		return (c == '+' || c == '-' || c == '*' || c == '/' || c == '\\' || c == ',' || c =='(' || c == ')' || c == '=') ? true : false;
 		
 	}
 	
