@@ -3,7 +3,6 @@
  */
 package Codigos;
 
-import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -22,7 +21,7 @@ public class Main {
 	public static void main(String[] args) throws FileNotFoundException {
 
 		String escopoAtual = "global";
-		String tokenLido = "";
+		String lexema = "";
 		char caractere;
 		
 		//declaração da tabela de palavras reservadas
@@ -32,7 +31,7 @@ public class Main {
 		
 		
 		//definição do caminho
-		String caminho = "C:\\Users\\Amanda\\Desktop\\Trabalho\\compiladores\\Analisador Lexico\\input1.txt";
+		String caminho = "input2.txt";
 		//leitura do arquivo
 		FileInputStream stream;
 		try {
@@ -43,22 +42,22 @@ public class Main {
 	        	//leio o primeiro caractere
 	        	caractere = (char) c;
 
-	        	if (tokenLido == "" && caractere == '!') {
+	        	if (lexema == "" && caractere == '!') {
 	        		//se corresponde à um comentário, continua a leitura até terminar e ignora
 	        		do {
 	        			caractere = (char) c;
 	        			c = entradaFormatada.read();
 	        		}while (caractere != '\n' && c != -1);
-	        		tokenLido = "";
+	        		lexema = "";
 	        	}
 	        	
 	        	//pegar valor das strings
-	        	else if (caractere == '"' && tokenLido == "") {
+	        	else if (caractere == '"' && lexema == "") {
 	        		//ao ler a primeira aspa dupla, que não esteja no meio do token,
 	        		//continua a leitura até encontrar o fim da string
 	        		caractere = (char) c;
 	        		do {
-	        			tokenLido = tokenLido + caractere;
+	        			lexema = lexema + caractere;
 	        			c = entradaFormatada.read();
 	        			caractere = (char) c;
 	        			if (c == -1) {
@@ -68,69 +67,69 @@ public class Main {
 	        			}
 	        		}while (caractere != '"');
 	        		//adicionar na tabela
-	        		tokenLido = tokenLido + caractere;
-	        		TabelaSimbolos.add(new Simbolos("String", tokenLido, "", escopoAtual));
-	        		tokenLido = "";
+	        		lexema = lexema + caractere;
+	        		TabelaSimbolos.add(new Simbolos(lexema, "<String>", "", escopoAtual));
+	        		lexema = "";
 	        	}
 	        	//separar os simbolos que podem ser identificados mesmo sem espaço
 	        	//ex: var=num+num
 	        	else if(palavrasReservadas.simboloDispensaEspaço(caractere)) {
 	        		//coloca o token na tabela e o simbolo também
 	        		//verifica se é variavel
-	        		if (tokenLido.matches("[a-zA-Z]+[a-zA-z0-9]*")) {
-	        			TabelaSimbolos.add(new Simbolos ("Variavel", tokenLido, "", escopoAtual));
+	        		if (lexema.matches("[a-zA-Z]+[a-zA-z0-9]*")) {
+	        			TabelaSimbolos.add(new Simbolos (lexema,"<ID>", "", escopoAtual));
 	        		//verifica se é um numeral
-	        		} else if (tokenLido.matches("^[+-]?(([0-9]*[\\.][0-9]+)|([0-9]+[\\.][0-9]*)|([0-9]+))")){
-	        			TabelaSimbolos.add(new Simbolos ("Numeral", tokenLido, "", escopoAtual));
+	        		} else if (lexema.matches("^[+-]?(([0-9]*[\\.][0-9]+)|([0-9]+[\\.][0-9]*)|([0-9]+))")){
+	        			TabelaSimbolos.add(new Simbolos (lexema, "<NUM>", "", escopoAtual));
 	        		}
 	        		//se é outro simbolo
-	        		else if(palavrasReservadas.estaReservada(tokenLido)) {
-	        			TabelaSimbolos.add(new Simbolos("Palavra Reservada", tokenLido,"", escopoAtual));
+	        		else if(palavrasReservadas.estaReservada(lexema)) {
+	        			TabelaSimbolos.add(new Simbolos(lexema,"<OP>", "", escopoAtual));
 	        		}
 	        		//para demais tipos
 	        		else {
-	        			TabelaSimbolos.add(new Simbolos ("Unknow", tokenLido, "", escopoAtual));
+	        			TabelaSimbolos.add(new Simbolos ( lexema, "<Unknow>", "", escopoAtual));
 	        		}
-	        		TabelaSimbolos.add( new Simbolos("Palavra reservada", String.valueOf(caractere), "", escopoAtual));
-	        		tokenLido = "";
+	        		TabelaSimbolos.add( new Simbolos(String.valueOf(caractere), "<OP>", "", escopoAtual));
+	        		lexema = "";
 	        	}
 	        	//ler o token até cair em algo que faça parar
 	        	else if (caractere == ' ' || caractere == '\n' || caractere == '\t'){
-	        		if (tokenLido != "") {
+	        		if (lexema != "") {
 						//se for palavra reservada só guarda na tabela de simbolos
-		        		if (palavrasReservadas.estaReservada(tokenLido)) {
+		        		if (palavrasReservadas.estaReservada(lexema)) {
 							//verifica se existe alteração de escopo
-							if (tokenLido == "subrotine" || tokenLido == "function") {
+							if (lexema == "subroutine" || lexema == "function") {
 								if (TabelaSimbolos.get(TabelaSimbolos.size() -1).getToken() == "end") {
 									escopoAtual = "global";
 								}
 								else {
 									//salva o nome da subrotina
-									escopoAtual = tokenLido;
+									escopoAtual = lexema;
 								}
 							}
 							//guarda na tabela de simbolos
-							TabelaSimbolos.add(new Simbolos("Palavra Reservada", tokenLido, "", escopoAtual));
-							tokenLido = "";
+							TabelaSimbolos.add(new Simbolos(lexema,"<RESERVED>", "", escopoAtual));
+							lexema = "";
 						}
 						//verifica se é uma variável
-						else if (tokenLido.matches("[a-zA-Z]+[a-zA-z0-9]*")){
-							TabelaSimbolos.add(new Simbolos("Variavel", tokenLido, "", escopoAtual));
-							tokenLido = "";
+						else if (lexema.matches("[a-zA-Z]+[a-zA-z0-9]*")){
+							TabelaSimbolos.add(new Simbolos(lexema, "<ID>", "", escopoAtual));
+							lexema = "";
 						}
 						//verifica se é um numeral valido
-						else if (tokenLido.matches("^[+-]?(([0-9]*[\\.][0-9]+)|([0-9]+[\\.][0-9]*)|([0-9]+))")){
-							TabelaSimbolos.add( new Simbolos("Numeral", tokenLido, "", escopoAtual));
-							tokenLido = "";
+						else if (lexema.matches("^[+-]?(([0-9]*[\\.][0-9]+)|([0-9]+[\\.][0-9]*)|([0-9]+))")){
+							TabelaSimbolos.add( new Simbolos(lexema, "<NUM>", "", escopoAtual));
+							lexema = "";
 						}
 						else {
-	 						System.out.println("Erro encontrado próximo à " + tokenLido );
-							tokenLido = "";
+	 						System.out.println("Erro encontrado próximo à " + lexema );
+							lexema = "";
 						}
 	        		}
 				}
 				else {
-					tokenLido = tokenLido + caractere;
+					lexema = lexema + caractere;
 				}
 				//le o proximo caractere
 				c = entradaFormatada.read();

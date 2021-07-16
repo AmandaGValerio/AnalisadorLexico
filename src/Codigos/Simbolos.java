@@ -18,7 +18,7 @@ public class Simbolos {
 	
 	public Simbolos() {	}
 
-	public Simbolos(/*int posicao,*/ String lexema, String token, String valor, String scopo) {
+	public Simbolos(String lexema, String token, String valor, String scopo) {
 		//Posicao = posicao;
 		Lexema = lexema;
 		Token = token;
@@ -26,8 +26,7 @@ public class Simbolos {
 		this.scopo = scopo;
 	}
 	
-	public Simbolos(/*int posicao,*/ String lexema, String token, String valor, String scopo, int linhas, int colunas) {
-		//Posicao = posicao;
+	public Simbolos(String lexema, String token, String valor, String scopo, int linhas, int colunas) {
 		Lexema = lexema;
 		Token = token;
 		Valor = valor;
@@ -36,12 +35,6 @@ public class Simbolos {
 		this.tamanho[1] = colunas;
 	}
 
-	/*public int getPosicao() {
-		return Posicao;
-	}
-	public void setPosicao(int posicao) {
-		Posicao = posicao;
-	}*/
 	public String getLexema() {
 		return Lexema;
 	}
